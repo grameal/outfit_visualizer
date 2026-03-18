@@ -3,59 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outfit Style Visualizer</title>
+    <title>Advanced Outfit Style Visualizer</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Smooth color transition for our SVGs */
+        /* Smooth color and shape transitions for our SVGs */
         svg path {
-            transition: fill 0.4s ease-in-out;
+            transition: fill 0.4s ease-in-out, d 0.4s ease-in-out;
         }
-        /* Custom scrollbar for swatch pickers on mobile */
-        .hide-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scroll {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        /* Hide scrollbars for a clean mobile UI */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex items-center justify-center p-4 md:p-8">
 
-    <!-- Main Application Card -->
-    <main class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
+    <main class="max-w-3xl w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
         
         <!-- Header -->
-        <header class="text-center py-6 bg-white border-b border-slate-100 shadow-sm z-10">
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Outfit Visualizer</h1>
-            <p class="text-sm text-slate-500 mt-1">Mix & match to find your perfect style</p>
+        <header class="text-center py-5 bg-white border-b border-slate-100 shadow-sm z-10">
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Outfit Visualizer Pro</h1>
+            <p class="text-sm text-slate-500 mt-1">Mix styles & colors to find your aesthetic</p>
         </header>
 
         <!-- Preview Area -->
         <div class="bg-slate-50 p-8 flex flex-col items-center justify-center border-b border-slate-200 relative overflow-hidden">
-            <!-- Ambient background blob -->
-            <div class="absolute w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50 mix-blend-multiply pointer-events-none"></div>
+            <!-- Ambient Background -->
+            <div class="absolute w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-50 mix-blend-multiply pointer-events-none"></div>
             
-            <!-- SVGs Stacked to form an outfit -->
-            <div class="relative drop-shadow-xl flex flex-col items-center">
+            <!-- SVG Garment Stack -->
+            <div class="relative drop-shadow-xl flex flex-col items-center h-80 justify-end pb-4">
                 
-                <!-- T-Shirt SVG -->
-                <svg viewBox="0 0 200 160" class="w-48 h-auto z-20">
+                <!-- TOP SVG -->
+                <svg viewBox="0 0 200 170" class="w-56 h-auto z-20 absolute top-0">
+                    <!-- Specific ID targeted by the JavaScript function -->
                     <path id="shirt-path" 
                           d="M 80 40 Q 100 55 120 40 L 150 50 L 180 85 Q 185 90 180 95 L 160 110 Q 155 115 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 Q 45 115 40 110 L 20 95 Q 15 90 20 85 L 50 50 Z" 
                           fill="#f8fafc" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
                 </svg>
 
-                <!-- Trousers SVG -->
-                <svg viewBox="0 0 200 150" class="w-48 h-auto -mt-1 z-10">
+                <!-- BOTTOM SVG -->
+                <svg viewBox="0 0 200 150" class="w-56 h-auto z-10 absolute top-[135px]">
                     <path id="pants-path" 
                           d="M 65 0 L 135 0 L 140 150 L 110 150 L 100 60 L 90 150 L 60 150 Z" 
                           fill="#172554" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
                 </svg>
 
-                <!-- Shoes SVG -->
-                <svg viewBox="0 0 200 40" class="w-48 h-auto -mt-1 z-0">
+                <!-- SHOES SVG -->
+                <svg viewBox="0 0 200 40" class="w-56 h-auto z-0 absolute top-[280px]">
                     <path id="shoes-path-left" 
                           d="M 60 0 L 90 0 L 90 20 Q 90 30 80 30 L 40 30 Q 30 30 35 15 Q 40 0 60 0 Z" 
                           fill="#78350f" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
@@ -63,182 +58,236 @@
                           d="M 110 0 L 140 0 Q 160 0 165 15 Q 170 30 160 30 L 120 30 Q 110 30 110 20 L 110 0 Z" 
                           fill="#78350f" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
                 </svg>
-
             </div>
         </div>
 
-        <!-- Controls & Verdict Area -->
+        <!-- Controls Area -->
         <div class="p-6 md:p-8 bg-white flex flex-col gap-6">
             
-            <!-- Pickers -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Picker 1: Shirt -->
+            <!-- Garment Type Selectors -->
+            <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-6">
                 <div>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Top Color</span>
-                    <div id="shirt-swatches" class="flex md:flex-wrap gap-2 overflow-x-auto hide-scroll pb-2 md:pb-0"></div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Top Style</label>
+                    <select id="top-style-select" onchange="changeTopStyle(this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="tshirt">T-Shirt</option>
+                        <option value="kurta">Kurta / Kurti</option>
+                        <option value="blazer">Blazer</option>
+                        <option value="shirt">Button-down Shirt</option>
+                        <option value="croptop">Crop Top</option>
+                    </select>
                 </div>
-                
-                <!-- Picker 2: Trousers -->
                 <div>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Bottom Color</span>
-                    <div id="pants-swatches" class="flex md:flex-wrap gap-2 overflow-x-auto hide-scroll pb-2 md:pb-0"></div>
-                </div>
-
-                <!-- Picker 3: Shoes -->
-                <div>
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Footwear</span>
-                    <div id="shoes-swatches" class="flex md:flex-wrap gap-2 overflow-x-auto hide-scroll pb-2 md:pb-0"></div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Bottom Style</label>
+                    <select id="bottom-style-select" onchange="changeBottomStyle(this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="trousers">Trousers</option>
+                        <option value="skirt">A-Line Skirt</option>
+                        <option value="shorts">Shorts</option>
+                        <option value="jeans">Flared Jeans</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- Style Verdict -->
-            <div class="mt-4 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-start gap-4 transition-all">
-                <div class="text-indigo-500 text-2xl">✨</div>
+            <!-- Color Swatches -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Top Color Picker -->
                 <div>
-                    <h3 class="text-sm font-bold text-indigo-900 uppercase tracking-wide mb-1">Style Verdict</h3>
-                    <p id="verdict-text" class="text-indigo-800 font-medium leading-relaxed">
-                        Loading your style...
-                    </p>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Top Color</span>
+                    <div id="top-swatches" class="flex flex-wrap gap-2"></div>
+                </div>
+                <!-- Bottom Color Picker -->
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Bottom Color</span>
+                    <div id="bottom-swatches" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+
+            <!-- Style Verdict Box -->
+            <div class="mt-2 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl flex flex-col sm:flex-row items-start gap-4">
+                <div class="text-indigo-500 text-3xl">✨</div>
+                <div>
+                    <h3 id="vibe-title" class="text-sm font-bold text-indigo-900 uppercase tracking-wide mb-1">Loading Vibe...</h3>
+                    <p id="style-tip" class="text-indigo-800 text-sm font-medium leading-relaxed"></p>
                 </div>
             </div>
 
         </div>
     </main>
 
-    <!-- Interactive Logic -->
+    <!-- JavaScript Logic -->
     <script>
-        // Color Data Libraries
-        const shirtColors =[
-            { name: 'White', hex: '#f8fafc' },
-            { name: 'Black', hex: '#1e293b' },
-            { name: 'Navy', hex: '#1e3a8a' },
-            { name: 'Red', hex: '#b91c1c' },
-            { name: 'Olive', hex: '#4d7c0f' },
-            { name: 'Mustard', hex: '#ca8a04' }
-        ];
-
-        const pantsColors =[
-            { name: 'Navy', hex: '#172554' },
-            { name: 'Black', hex: '#0f172a' },
-            { name: 'Khaki', hex: '#c2b280' },
-            { name: 'Gray', hex: '#64748b' },
-            { name: 'Olive', hex: '#3f6212' }
-        ];
-
-        const shoeColors =[
-            { name: 'White', hex: '#f1f5f9' },
-            { name: 'Black', hex: '#020617' },
-            { name: 'Brown', hex: '#78350f' },
-            { name: 'Gray', hex: '#9ca3af' }
-        ];
-
-        // State variables
-        let state = {
-            shirt: shirtColors[0], // Default White
-            pants: pantsColors[0], // Default Navy
-            shoes: shoeColors[2]   // Default Brown
+        /* =========================================
+           1. SVG PATH DEFINITIONS (The Shapes)
+           ========================================= */
+        const svgPaths = {
+            tops: {
+                tshirt: "M 80 40 Q 100 55 120 40 L 150 50 L 180 85 Q 185 90 180 95 L 160 110 Q 155 115 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 Q 45 115 40 110 L 20 95 Q 15 90 20 85 L 50 50 Z",
+                kurta: "M 75 40 Q 100 50 125 40 L 145 55 L 175 110 L 150 120 L 135 90 L 135 170 L 65 170 L 65 90 L 50 120 L 25 110 L 55 55 Z", // Longer, draped
+                blazer: "M 75 30 L 100 70 L 125 30 L 160 50 L 185 100 L 165 110 L 145 70 L 140 145 L 60 145 L 55 70 L 35 110 L 15 100 L 40 50 Z", // Broad shoulders, structured
+                shirt: "M 75 35 L 85 50 L 100 65 L 115 50 L 125 35 L 150 50 L 180 85 L 160 110 L 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 L 40 110 L 20 85 L 50 50 Z", // V-neck / collar indication
+                croptop: "M 80 40 Q 100 55 120 40 L 140 45 L 150 70 L 135 75 L 130 60 L 130 100 L 70 100 L 70 60 L 65 75 L 50 70 L 60 45 Z" // Shorter
+            },
+            bottoms: {
+                trousers: "M 65 0 L 135 0 L 140 150 L 110 150 L 100 60 L 90 150 L 60 150 Z",
+                skirt: "M 65 0 L 135 0 L 170 120 Q 100 135 30 120 Z", // A-line flow
+                shorts: "M 65 0 L 135 0 L 145 70 L 110 70 L 100 30 L 90 70 L 55 70 Z", // Cut high
+                jeans: "M 65 0 L 135 0 L 150 150 L 115 150 L 100 60 L 85 150 L 50 150 Z" // Flared bottom
+            }
         };
 
-        // Initialize UI
-        function init() {
-            renderSwatches('shirt-swatches', shirtColors, state.shirt, (color) => {
-                state.shirt = color;
-                updateVisuals();
-            });
+        /* =========================================
+           2. COLOR PALETTES
+           ========================================= */
+        const topColors =[
+            { name: 'White', hex: '#f8fafc' }, { name: 'Black', hex: '#1e293b' },
+            { name: 'Navy', hex: '#1e3a8a' }, { name: 'Light Blue', hex: '#7dd3fc'},
+            { name: 'Red', hex: '#b91c1c' }, { name: 'Olive', hex: '#4d7c0f' },
+            { name: 'Mustard', hex: '#ca8a04' }, { name: 'Pink', hex: '#f472b6' },
+            { name: 'Beige', hex: '#f5f5dc' }
+        ];
 
-            renderSwatches('pants-swatches', pantsColors, state.pants, (color) => {
-                state.pants = color;
-                updateVisuals();
-            });
+        const bottomColors =[
+            { name: 'Black', hex: '#0f172a' }, { name: 'Navy', hex: '#172554' },
+            { name: 'Beige', hex: '#c2b280' }, { name: 'Gray', hex: '#64748b' },
+            { name: 'Olive', hex: '#3f6212' }, { name: 'White', hex: '#f8fafc' },
+            { name: 'Denim', hex: '#3b82f6' }
+        ];
 
-            renderSwatches('shoes-swatches', shoeColors, state.shoes, (color) => {
-                state.shoes = color;
-                updateVisuals();
-            });
+        /* =========================================
+           3. 30-ITEM JSON COMBINATION DATABASE
+           ========================================= */
+        const styleDatabase =[
+            { top: "Navy", bottom: "Beige", vibe: "Old Money", tip: "A timeless classic. Pair with brown leather loafers and a matching belt." },
+            { top: "White", bottom: "Black", vibe: "Minimalist Cool", tip: "High contrast and sleek. Perfect with clean white sneakers." },
+            { top: "Black", bottom: "Black", vibe: "Stealth Mode", tip: "An all-black silhouette never goes out of style. Add a silver watch." },
+            { top: "White", bottom: "Navy", vibe: "Nautical Chic", tip: "Fresh and approachable. Great for a casual Friday or weekend brunch." },
+            { top: "Light Blue", bottom: "Navy", vibe: "Monochrome Cool", tip: "Tonal dressing makes you look taller. Try with suede boots." },
+            { top: "Red", bottom: "Beige", vibe: "Preppy Statement", tip: "Bold top grounded by neutral pants. Keep accessories minimal." },
+            { top: "Olive", bottom: "Black", vibe: "Urban Explorer", tip: "Earthy and rugged. Looks amazing with black boots." },
+            { top: "Mustard", bottom: "Navy", vibe: "Autumn Vibe", tip: "Complementary colors that pop. Ideal for fall weather." },
+            { top: "Pink", bottom: "White", vibe: "Summer Breeze", tip: "Light, airy, and confident. Rock this at a resort or beach party." },
+            { top: "Black", bottom: "Gray", vibe: "Industrial Modern", tip: "Sharp and professional but with an edge." },
+            { top: "White", bottom: "Olive", vibe: "Safari Chic", tip: "Clean white makes the olive tones look rich. Add canvas sneakers." },
+            { top: "Navy", bottom: "Gray", vibe: "Business Casual", tip: "The standard for office wear. Highly versatile and respectable." },
+            { top: "Beige", bottom: "White", vibe: "Coastal Grandfather", tip: "Relaxed linen vibes. Pair with woven slip-on shoes." },
+            { top: "Navy", bottom: "Denim", vibe: "Double Blue", tip: "Make sure the shades contrast enough to avoid the uniform look." },
+            { top: "Olive", bottom: "Beige", vibe: "Nature Inspired", tip: "Earthy tones pair beautifully together. Try a leather strap watch." },
+            { top: "Black", bottom: "Beige", vibe: "Smart Casual", tip: "A great transitional outfit from day to night." },
+            { top: "Navy", bottom: "White", vibe: "Yacht Club", tip: "Rich and luxurious. Keep your shoes spotless to complete the look." },
+            { top: "White", bottom: "Gray", vibe: "Clean Cut", tip: "Soft contrast that works on almost every skin tone." },
+            { top: "Red", bottom: "Black", vibe: "Bold & Edgy", tip: "A powerful combination. Best for evening wear or making an impression." },
+            { top: "Mustard", bottom: "Black", vibe: "Striking Contrast", tip: "Let the mustard be the hero piece. Black grounds the outfit." },
+            { top: "Pink", bottom: "Navy", vibe: "Playful Elegance", tip: "Navy cools down the pink, making it very wearable and stylish." },
+            { top: "Light Blue", bottom: "White", vibe: "Resort Wear", tip: "Looks like a clear summer sky. Perfect for warm days." },
+            { top: "Light Blue", bottom: "Gray", vibe: "Soft Professional", tip: "A softer alternative to stark white. Very approachable." },
+            { top: "Beige", bottom: "Navy", vibe: "Inverted Classic", tip: "A lighter top draws the eye upwards. Very flattering." },
+            { top: "Red", bottom: "Navy", vibe: "Americana", tip: "A bold, nautical-inspired color block. Confident and striking." },
+            { top: "Olive", bottom: "Denim", vibe: "Rugged Casual", tip: "The perfect weekend errand outfit. Highly functional style." },
+            { top: "Mustard", bottom: "Denim", vibe: "Retro 70s", tip: "Vintage feel. Pair with some classic canvas high-tops." },
+            { top: "White", bottom: "Denim", vibe: "The Absolute Classic", tip: "James Dean approved. You literally cannot go wrong with this." },
+            { top: "Black", bottom: "Denim", vibe: "Rocker Chic", tip: "Effortless edge. Throw on a leather jacket to complete it." },
+            { top: "White", bottom: "White", vibe: "Angelic / All-White", tip: "High maintenance but high reward. Play with textures!" }
+        ];
 
-            updateVisuals();
+        /* =========================================
+           4. APPLICATION STATE & LOGIC
+           ========================================= */
+        let state = {
+            topColor: topColors[0],    // White
+            bottomColor: bottomColors[2] // Beige
+        };
+
+        // EXACT FUNCTION REQUESTED: Target 'shirt-path' and change fill color
+        function applyTopColorToSVG(hexColor) {
+            const shirtPath = document.getElementById('shirt-path');
+            if (shirtPath) {
+                shirtPath.setAttribute('fill', hexColor);
+            }
         }
 
-        // Render color buttons dynamically
-        function renderSwatches(containerId, colorsArray, currentColor, onClickCallback) {
+        // Change Bottom Color function
+        function applyBottomColorToSVG(hexColor) {
+            const pantsPath = document.getElementById('pants-path');
+            if (pantsPath) {
+                pantsPath.setAttribute('fill', hexColor);
+            }
+        }
+
+        // Swap SVG Shapes
+        function changeTopStyle(styleKey) {
+            document.getElementById('shirt-path').setAttribute('d', svgPaths.tops[styleKey]);
+        }
+
+        function changeBottomStyle(styleKey) {
+            document.getElementById('pants-path').setAttribute('d', svgPaths.bottoms[styleKey]);
+        }
+
+        // Render Color Buttons
+        function renderSwatches(containerId, colorsArray, currentColor, isTop) {
             const container = document.getElementById(containerId);
-            container.innerHTML = ''; // Clear existing
+            container.innerHTML = ''; 
 
             colorsArray.forEach(color => {
                 const btn = document.createElement('button');
-                const isSelected = currentColor.hex === color.hex;
+                const isSelected = currentColor.name === color.name;
                 
-                btn.className = `w-8 h-8 md:w-10 md:h-10 rounded-full shadow-sm border-2 flex-shrink-0 transition-all duration-200 
-                    ${isSelected ? 'border-indigo-500 scale-110 ring-2 ring-indigo-200' : 'border-slate-200 hover:scale-105'}`;
+                btn.className = `w-8 h-8 rounded-full shadow-sm border-2 flex-shrink-0 transition-all duration-200 
+                    ${isSelected ? 'border-indigo-500 scale-125 ring-2 ring-indigo-200 z-10' : 'border-slate-200 hover:scale-110'}`;
                 btn.style.backgroundColor = color.hex;
                 btn.title = color.name;
-                btn.setAttribute('aria-label', color.name);
                 
                 btn.onclick = () => {
-                    onClickCallback(color);
-                    // Re-render this specific swatch row to update the ring selection
-                    renderSwatches(containerId, colorsArray, color, onClickCallback);
+                    if(isTop) {
+                        state.topColor = color;
+                        applyTopColorToSVG(color.hex); // Calling the specific JS function
+                    } else {
+                        state.bottomColor = color;
+                        applyBottomColorToSVG(color.hex);
+                    }
+                    // Re-render to update the visual "selected" ring
+                    renderSwatches('top-swatches', topColors, state.topColor, true);
+                    renderSwatches('bottom-swatches', bottomColors, state.bottomColor, false);
+                    updateVerdict();
                 };
-
                 container.appendChild(btn);
             });
         }
 
-        // Update the SVG fill colors and Text Verdict
-        function updateVisuals() {
-            // Update SVGs
-            document.getElementById('shirt-path').setAttribute('fill', state.shirt.hex);
-            document.getElementById('pants-path').setAttribute('fill', state.pants.hex);
-            document.getElementById('shoes-path-left').setAttribute('fill', state.shoes.hex);
-            document.getElementById('shoes-path-right').setAttribute('fill', state.shoes.hex);
-
-            // Update Verdict
-            const verdictEl = document.getElementById('verdict-text');
-            verdictEl.innerText = calculateVerdict(state.shirt.name, state.pants.name, state.shoes.name);
-        }
-
-        // Style Logic Engine
-        function calculateVerdict(shirt, pants, shoes) {
-            // All Matching
-            if (shirt === 'Black' && pants === 'Black' && shoes === 'Black') {
-                return "Stealth mode activated. A sleek, all-black silhouette that never goes out of style.";
-            }
-            if (shirt === pants) {
-                return `Rocking the monochromatic ${shirt} look. Bold, modern, and unified!`;
-            }
-
-            // High Contrast / Classics
-            if (shirt === 'White' && pants === 'Navy') {
-                return "A timeless classic! Crisp white top with navy trousers is sophisticated and versatile.";
-            }
-            if (shirt === 'White' && pants === 'Black') {
-                return "High-contrast monochrome. Clean, minimalist, and highly fashionable.";
-            }
-            if (shirt === 'Navy' && pants === 'Khaki') {
-                return "Sophisticated casual. Great for the office, a weekend out, or playing golf.";
-            }
-
-            // Colorful combinations
-            if (['Red', 'Mustard'].includes(shirt) && ['Olive', 'Khaki'].includes(pants)) {
-                return "Earthy and vibrant! A fantastic pop of color anchored by natural tones.";
-            }
-            if (shirt === 'Red' && pants === 'Navy') {
-                return "A preppy, nautical-inspired color block. Confident and striking.";
-            }
+        // Update the JSON-driven Verdict Box
+        function updateVerdict() {
+            const topName = state.topColor.name;
+            const bottomName = state.bottomColor.name;
             
-            // Shoe matching highlights
-            if (shoes === shirt && shirt !== 'White') {
-                return `Excellent color coordination! Matching your ${shoes.toLowerCase()} shoes with your top ties the whole outfit together.`;
-            }
-            if (shoes === 'White') {
-                return `The crisp white sneakers give this ${shirt} and ${pants} combo a very fresh, street-ready vibe.`;
-            }
+            // Search the 30-item JSON array for a match
+            const match = styleDatabase.find(combo => combo.top === topName && combo.bottom === bottomName);
+            
+            const titleEl = document.getElementById('vibe-title');
+            const tipEl = document.getElementById('style-tip');
 
-            // Fallback
-            return `Rocking a ${shirt} top with ${pants} trousers and ${shoes} shoes. A unique expression of your personal style!`;
+            if (match) {
+                titleEl.innerText = match.vibe;
+                tipEl.innerText = match.tip;
+            } else {
+                // Fallback for combinations not in the 30-item list
+                titleEl.innerText = "Avant-Garde Explorer";
+                tipEl.innerText = `You're pairing a ${topName} top with ${bottomName} bottoms. Confidence is your best accessory—own this unique combo!`;
+            }
         }
 
-        // Boot up the app
+        // Initialization
+        function init() {
+            // Setup initial colors
+            applyTopColorToSVG(state.topColor.hex);
+            applyBottomColorToSVG(state.bottomColor.hex);
+            
+            // Build UI pickers
+            renderSwatches('top-swatches', topColors, state.topColor, true);
+            renderSwatches('bottom-swatches', bottomColors, state.bottomColor, false);
+            
+            // Generate Initial Verdict
+            updateVerdict();
+        }
+
+        // Run on load
         init();
     </script>
 </body>
