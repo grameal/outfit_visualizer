@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outfit Style Visualizer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Smooth color transition for our SVGs */
+        svg path {
+            transition: fill 0.4s ease-in-out;
+        }
+        /* Custom scrollbar for swatch pickers on mobile */
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <!-- Main Application Card -->
+    <main class="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
+        
+        <!-- Header -->
+        <header class="text-center py-6 bg-white border-b border-slate-100 shadow-sm z-10">
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Outfit Visualizer</h1>
+            <p class="text-sm text-slate-500 mt-1">Mix & match to find your perfect style</p>
+        </header>
+
+        <!-- Preview Area -->
+        <div class="bg-slate-50 p-8 flex flex-col items-center justify-center border-b border-slate-200 relative overflow-hidden">
+            <!-- Ambient background blob -->
+            <div class="absolute w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50 mix-blend-multiply pointer-events-none"></div>
+            
+            <!-- SVGs Stacked to form an outfit -->
+            <div class="relative drop-shadow-xl flex flex-col items-center">
+                
+                <!-- T-Shirt SVG -->
+                <svg viewBox="0 0 200 160" class="w-48 h-auto z-20">
+                    <path id="shirt-path" 
+                          d="M 80 40 Q 100 55 120 40 L 150 50 L 180 85 Q 185 90 180 95 L 160 110 Q 155 115 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 Q 45 115 40 110 L 20 95 Q 15 90 20 85 L 50 50 Z" 
+                          fill="#f8fafc" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                </svg>
+
+                <!-- Trousers SVG -->
+                <svg viewBox="0 0 200 150" class="w-48 h-auto -mt-1 z-10">
+                    <path id="pants-path" 
+                          d="M 65 0 L 135 0 L 140 150 L 110 150 L 100 60 L 90 150 L 60 150 Z" 
+                          fill="#172554" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                </svg>
+
+                <!-- Shoes SVG -->
+                <svg viewBox="0 0 200 40" class="w-48 h-auto -mt-1 z-0">
+                    <path id="shoes-path-left" 
+                          d="M 60 0 L 90 0 L 90 20 Q 90 30 80 30 L 40 30 Q 30 30 35 15 Q 40 0 60 0 Z" 
+                          fill="#78350f" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                    <path id="shoes-path-right" 
+                          d="M 110 0 L 140 0 Q 160 0 165 15 Q 170 30 160 30 L 120 30 Q 110 30 110 20 L 110 0 Z" 
+                          fill="#78350f" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
+                </svg>
+
+            </div>
+        </div>
+
+        <!-- Controls & Verdict Area -->
+        <div class="p-6 md:p-8 bg-white flex flex-col gap-6">
+            
+            <!-- Pickers -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Picker 1: Shirt -->
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Top Color</span>
+                    <div id="shirt-swatches" class="flex md:flex-wrap gap-2 overflow-x-auto hide-scroll pb-2 md:pb-0"></div>
+                </div>
+                
+                <!-- Picker 2: Trousers -->
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Bottom Color</span>
+                    <div id="pants-swatches" class="flex md:flex-wrap gap-2 overflow-x-auto hide-scroll pb-2 md:pb-0"></div>
+                </div>
+
+                <!-- Picker 3: Shoes -->
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Footwear</span>
+                    <div id="shoes-swatches" class="flex md:flex-wrap gap-2 overflow-x-auto hide-scroll pb-2 md:pb-0"></div>
+                </div>
+            </div>
+
+            <!-- Style Verdict -->
+            <div class="mt-4 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-start gap-4 transition-all">
+                <div class="text-indigo-500 text-2xl">✨</div>
+                <div>
+                    <h3 class="text-sm font-bold text-indigo-900 uppercase tracking-wide mb-1">Style Verdict</h3>
+                    <p id="verdict-text" class="text-indigo-800 font-medium leading-relaxed">
+                        Loading your style...
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Interactive Logic -->
+    <script>
+        // Color Data Libraries
+        const shirtColors =[
+            { name: 'White', hex: '#f8fafc' },
+            { name: 'Black', hex: '#1e293b' },
+            { name: 'Navy', hex: '#1e3a8a' },
+            { name: 'Red', hex: '#b91c1c' },
+            { name: 'Olive', hex: '#4d7c0f' },
+            { name: 'Mustard', hex: '#ca8a04' }
+        ];
+
+        const pantsColors =[
+            { name: 'Navy', hex: '#172554' },
+            { name: 'Black', hex: '#0f172a' },
+            { name: 'Khaki', hex: '#c2b280' },
+            { name: 'Gray', hex: '#64748b' },
+            { name: 'Olive', hex: '#3f6212' }
+        ];
+
+        const shoeColors =[
+            { name: 'White', hex: '#f1f5f9' },
+            { name: 'Black', hex: '#020617' },
+            { name: 'Brown', hex: '#78350f' },
+            { name: 'Gray', hex: '#9ca3af' }
+        ];
+
+        // State variables
+        let state = {
+            shirt: shirtColors[0], // Default White
+            pants: pantsColors[0], // Default Navy
+            shoes: shoeColors[2]   // Default Brown
+        };
+
+        // Initialize UI
+        function init() {
+            renderSwatches('shirt-swatches', shirtColors, state.shirt, (color) => {
+                state.shirt = color;
+                updateVisuals();
+            });
+
+            renderSwatches('pants-swatches', pantsColors, state.pants, (color) => {
+                state.pants = color;
+                updateVisuals();
+            });
+
+            renderSwatches('shoes-swatches', shoeColors, state.shoes, (color) => {
+                state.shoes = color;
+                updateVisuals();
+            });
+
+            updateVisuals();
+        }
+
+        // Render color buttons dynamically
+        function renderSwatches(containerId, colorsArray, currentColor, onClickCallback) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; // Clear existing
+
+            colorsArray.forEach(color => {
+                const btn = document.createElement('button');
+                const isSelected = currentColor.hex === color.hex;
+                
+                btn.className = `w-8 h-8 md:w-10 md:h-10 rounded-full shadow-sm border-2 flex-shrink-0 transition-all duration-200 
+                    ${isSelected ? 'border-indigo-500 scale-110 ring-2 ring-indigo-200' : 'border-slate-200 hover:scale-105'}`;
+                btn.style.backgroundColor = color.hex;
+                btn.title = color.name;
+                btn.setAttribute('aria-label', color.name);
+                
+                btn.onclick = () => {
+                    onClickCallback(color);
+                    // Re-render this specific swatch row to update the ring selection
+                    renderSwatches(containerId, colorsArray, color, onClickCallback);
+                };
+
+                container.appendChild(btn);
+            });
+        }
+
+        // Update the SVG fill colors and Text Verdict
+        function updateVisuals() {
+            // Update SVGs
+            document.getElementById('shirt-path').setAttribute('fill', state.shirt.hex);
+            document.getElementById('pants-path').setAttribute('fill', state.pants.hex);
+            document.getElementById('shoes-path-left').setAttribute('fill', state.shoes.hex);
+            document.getElementById('shoes-path-right').setAttribute('fill', state.shoes.hex);
+
+            // Update Verdict
+            const verdictEl = document.getElementById('verdict-text');
+            verdictEl.innerText = calculateVerdict(state.shirt.name, state.pants.name, state.shoes.name);
+        }
+
+        // Style Logic Engine
+        function calculateVerdict(shirt, pants, shoes) {
+            // All Matching
+            if (shirt === 'Black' && pants === 'Black' && shoes === 'Black') {
+                return "Stealth mode activated. A sleek, all-black silhouette that never goes out of style.";
+            }
+            if (shirt === pants) {
+                return `Rocking the monochromatic ${shirt} look. Bold, modern, and unified!`;
+            }
+
+            // High Contrast / Classics
+            if (shirt === 'White' && pants === 'Navy') {
+                return "A timeless classic! Crisp white top with navy trousers is sophisticated and versatile.";
+            }
+            if (shirt === 'White' && pants === 'Black') {
+                return "High-contrast monochrome. Clean, minimalist, and highly fashionable.";
+            }
+            if (shirt === 'Navy' && pants === 'Khaki') {
+                return "Sophisticated casual. Great for the office, a weekend out, or playing golf.";
+            }
+
+            // Colorful combinations
+            if (['Red', 'Mustard'].includes(shirt) && ['Olive', 'Khaki'].includes(pants)) {
+                return "Earthy and vibrant! A fantastic pop of color anchored by natural tones.";
+            }
+            if (shirt === 'Red' && pants === 'Navy') {
+                return "A preppy, nautical-inspired color block. Confident and striking.";
+            }
+            
+            // Shoe matching highlights
+            if (shoes === shirt && shirt !== 'White') {
+                return `Excellent color coordination! Matching your ${shoes.toLowerCase()} shoes with your top ties the whole outfit together.`;
+            }
+            if (shoes === 'White') {
+                return `The crisp white sneakers give this ${shirt} and ${pants} combo a very fresh, street-ready vibe.`;
+            }
+
+            // Fallback
+            return `Rocking a ${shirt} top with ${pants} trousers and ${shoes} shoes. A unique expression of your personal style!`;
+        }
+
+        // Boot up the app
+        init();
+    </script>
+</body>
+</html>
