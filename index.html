@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Outfit Style Visualizer</title>
+    <title>Advanced Outfit Style Visualizer Pro</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Smooth color and shape transitions for our SVGs */
-        svg path {
-            transition: fill 0.4s ease-in-out, d 0.4s ease-in-out;
+        /* Smooth color and shape transitions */
+        svg path, svg circle {
+            transition: fill 0.3s ease-in-out, stroke 0.3s ease-in-out;
         }
         /* Hide scrollbars for a clean mobile UI */
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -18,94 +18,85 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex items-center justify-center p-4 md:p-8">
 
-    <main class="max-w-3xl w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
+    <main class="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col">
         
         <!-- Header -->
         <header class="text-center py-5 bg-white border-b border-slate-100 shadow-sm z-10">
             <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Outfit Visualizer Pro</h1>
-            <p class="text-sm text-slate-500 mt-1">Mix styles & colors to find your aesthetic</p>
+            <p class="text-sm text-slate-500 mt-1">Mix styles, silhouettes & colors to find your aesthetic</p>
         </header>
 
         <!-- Preview Area -->
-        <div class="bg-slate-50 p-8 flex flex-col items-center justify-center border-b border-slate-200 relative overflow-hidden">
+        <div class="bg-slate-50 p-6 flex flex-col items-center justify-center border-b border-slate-200 relative overflow-hidden">
             <!-- Ambient Background -->
-            <div class="absolute w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-50 mix-blend-multiply pointer-events-none"></div>
+            <div class="absolute w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-50 mix-blend-multiply pointer-events-none"></div>
             
-            <!-- SVG Garment Stack -->
-            <div class="relative drop-shadow-xl flex flex-col items-center h-80 justify-end pb-4">
-                
-                <!-- TOP SVG -->
-                <svg viewBox="0 0 200 170" class="w-56 h-auto z-20 absolute top-0">
-                    <!-- Specific ID targeted by the JavaScript function -->
-                    <path id="shirt-path" 
-                          d="M 80 40 Q 100 55 120 40 L 150 50 L 180 85 Q 185 90 180 95 L 160 110 Q 155 115 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 Q 45 115 40 110 L 20 95 Q 15 90 20 85 L 50 50 Z" 
-                          fill="#f8fafc" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
-                </svg>
+            <!-- Gender Toggle -->
+            <div class="relative z-20 mb-6 bg-white p-1 rounded-full shadow-sm border border-slate-200 flex gap-1">
+                <button id="btn-male" onclick="setGender('male')" class="px-6 py-1.5 text-sm font-semibold rounded-full transition-colors bg-indigo-500 text-white shadow">Male Body</button>
+                <button id="btn-female" onclick="setGender('female')" class="px-6 py-1.5 text-sm font-semibold rounded-full transition-colors text-slate-600 hover:bg-slate-100">Female Body</button>
+            </div>
 
-                <!-- BOTTOM SVG -->
-                <svg viewBox="0 0 200 150" class="w-56 h-auto z-10 absolute top-[135px]">
-                    <path id="pants-path" 
-                          d="M 65 0 L 135 0 L 140 150 L 110 150 L 100 60 L 90 150 L 60 150 Z" 
-                          fill="#172554" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
-                </svg>
+            <!-- UNIFIED SVG CANVAS -->
+            <div class="relative drop-shadow-xl flex flex-col items-center justify-center h-80 w-full pb-4">
+                <svg viewBox="0 0 200 360" class="w-auto h-full z-10 relative">
+                    
+                    <!-- 1. BASE BODY -->
+                    <path id="body-path" d="" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5"/>
+                    
+                    <!-- 2. BOTTOMS -->
+                    <path id="bottoms-path" d="" fill="#172554" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+                    
+                    <!-- 3. TOPS -->
+                    <path id="tops-path" d="" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
+                    
+                    <!-- 4. SHOES -->
+                    <path id="shoes-path" d="" fill="#78350f" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>
 
-                <!-- SHOES SVG -->
-                <svg viewBox="0 0 200 40" class="w-56 h-auto z-0 absolute top-[280px]">
-                    <path id="shoes-path-left" 
-                          d="M 60 0 L 90 0 L 90 20 Q 90 30 80 30 L 40 30 Q 30 30 35 15 Q 40 0 60 0 Z" 
-                          fill="#78350f" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
-                    <path id="shoes-path-right" 
-                          d="M 110 0 L 140 0 Q 160 0 165 15 Q 170 30 160 30 L 120 30 Q 110 30 110 20 L 110 0 Z" 
-                          fill="#78350f" stroke="#1e293b" stroke-width="3" stroke-linejoin="round"/>
                 </svg>
             </div>
         </div>
 
         <!-- Controls Area -->
-        <div class="p-6 md:p-8 bg-white flex flex-col gap-6">
+        <div class="p-6 md:p-8 bg-white flex flex-col gap-8">
             
             <!-- Garment Type Selectors -->
-            <div class="grid grid-cols-2 gap-4 border-b border-slate-100 pb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-b border-slate-100 pb-6">
                 <div>
                     <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Top Style</label>
-                    <select id="top-style-select" onchange="changeTopStyle(this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="tshirt">T-Shirt</option>
-                        <option value="kurta">Kurta / Kurti</option>
-                        <option value="blazer">Blazer</option>
-                        <option value="shirt">Button-down Shirt</option>
-                        <option value="croptop">Crop Top</option>
-                    </select>
+                    <select id="top-style-select" onchange="changeStyle('topStyle', this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2.5 px-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Bottom Style</label>
-                    <select id="bottom-style-select" onchange="changeBottomStyle(this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2 px-3 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="trousers">Trousers</option>
-                        <option value="skirt">A-Line Skirt</option>
-                        <option value="shorts">Shorts</option>
-                        <option value="jeans">Flared Jeans</option>
-                    </select>
+                    <select id="bottom-style-select" onchange="changeStyle('bottomStyle', this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2.5 px-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Footwear</label>
+                    <select id="shoe-style-select" onchange="changeStyle('shoeStyle', this.value)" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-2.5 px-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                 </div>
             </div>
 
             <!-- Color Swatches -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Top Color Picker -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 border-b border-slate-100 pb-6">
                 <div>
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Top Color</span>
                     <div id="top-swatches" class="flex flex-wrap gap-2"></div>
                 </div>
-                <!-- Bottom Color Picker -->
                 <div>
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Bottom Color</span>
                     <div id="bottom-swatches" class="flex flex-wrap gap-2"></div>
                 </div>
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 block">Shoe Color</span>
+                    <div id="shoe-swatches" class="flex flex-wrap gap-2"></div>
+                </div>
             </div>
 
             <!-- Style Verdict Box -->
-            <div class="mt-2 p-5 bg-indigo-50 border border-indigo-100 rounded-2xl flex flex-col sm:flex-row items-start gap-4">
-                <div class="text-indigo-500 text-3xl">✨</div>
+            <div class="p-5 bg-indigo-50 border border-indigo-100 rounded-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+                <div class="text-indigo-500 text-4xl mt-1">✨</div>
                 <div>
-                    <h3 id="vibe-title" class="text-sm font-bold text-indigo-900 uppercase tracking-wide mb-1">Loading Vibe...</h3>
+                    <h3 id="vibe-title" class="text-base font-bold text-indigo-900 uppercase tracking-wide mb-1">Loading Vibe...</h3>
                     <p id="style-tip" class="text-indigo-800 text-sm font-medium leading-relaxed"></p>
                 </div>
             </div>
@@ -116,119 +107,200 @@
     <!-- JavaScript Logic -->
     <script>
         /* =========================================
-           1. SVG PATH DEFINITIONS (The Shapes)
+           1. PATH DEFINITIONS (Male & Female Data)
            ========================================= */
-        const svgPaths = {
-            tops: {
-                tshirt: "M 80 40 Q 100 55 120 40 L 150 50 L 180 85 Q 185 90 180 95 L 160 110 Q 155 115 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 Q 45 115 40 110 L 20 95 Q 15 90 20 85 L 50 50 Z",
-                kurta: "M 75 40 Q 100 50 125 40 L 145 55 L 175 110 L 150 120 L 135 90 L 135 170 L 65 170 L 65 90 L 50 120 L 25 110 L 55 55 Z", // Longer, draped
-                blazer: "M 75 30 L 100 70 L 125 30 L 160 50 L 185 100 L 165 110 L 145 70 L 140 145 L 60 145 L 55 70 L 35 110 L 15 100 L 40 50 Z", // Broad shoulders, structured
-                shirt: "M 75 35 L 85 50 L 100 65 L 115 50 L 125 35 L 150 50 L 180 85 L 160 110 L 150 110 L 135 90 L 135 150 L 65 150 L 65 90 L 50 110 L 40 110 L 20 85 L 50 50 Z", // V-neck / collar indication
-                croptop: "M 80 40 Q 100 55 120 40 L 140 45 L 150 70 L 135 75 L 130 60 L 130 100 L 70 100 L 70 60 L 65 75 L 50 70 L 60 45 Z" // Shorter
+        const svgData = {
+            male: {
+                // Base mannequin
+                body: "M 100 12 A 15 15 0 1 0 100 42 A 15 15 0 1 0 100 12 Z M 92 45 L 108 45 L 110 70 L 90 70 Z M 60 70 L 140 70 L 150 145 L 135 150 L 125 90 L 125 190 L 75 190 L 75 90 L 65 150 L 50 145 Z M 75 190 L 125 190 L 130 320 L 110 320 L 100 230 L 90 320 L 70 320 Z",
+                tops: {
+                    tshirt: "M 60 70 L 140 70 L 150 110 L 135 115 L 125 90 L 125 195 L 75 195 L 75 90 L 65 115 L 50 110 Z",
+                    shirt: "M 60 70 L 140 70 L 150 155 L 135 160 L 125 90 L 125 200 L 75 200 L 75 90 L 65 160 L 50 155 Z",
+                    kurta: "M 60 70 L 140 70 L 150 155 L 135 160 L 125 90 L 125 250 L 75 250 L 75 90 L 65 160 L 50 155 Z",
+                    sherwani: "M 60 70 L 140 70 L 150 155 L 135 160 L 125 90 L 125 260 L 100 260 L 100 90 M 100 260 L 75 260 L 75 90 L 65 160 L 50 155 Z"
+                },
+                bottoms: {
+                    trousers: "M 74 190 L 126 190 L 132 322 L 108 322 L 100 220 L 92 322 L 68 322 Z",
+                    jeans: "M 74 190 L 126 190 L 135 322 L 110 322 L 100 220 L 90 322 L 65 322 Z",
+                    dhoti: "M 74 190 L 126 190 L 145 260 L 120 290 L 100 240 L 80 290 L 55 260 Z",
+                    churidar: "M 74 190 L 126 190 L 130 260 L 112 325 L 100 220 L 88 325 L 70 260 Z"
+                },
+                shoes: {
+                    sneakers: "M 65 320 L 95 320 L 95 345 L 55 345 Q 55 325 65 320 M 105 320 L 135 320 Q 145 325 145 345 L 105 345 Z",
+                    formal: "M 68 320 L 93 320 L 93 340 L 55 340 Q 60 325 68 320 M 107 320 L 132 320 Q 140 325 145 340 L 107 340 Z",
+                    mojari: "M 60 320 L 95 320 L 95 340 L 50 340 Q 40 330 45 320 Q 55 330 60 320 M 105 320 L 140 320 Q 145 330 155 320 Q 160 330 150 340 L 105 340 Z"
+                }
             },
-            bottoms: {
-                trousers: "M 65 0 L 135 0 L 140 150 L 110 150 L 100 60 L 90 150 L 60 150 Z",
-                skirt: "M 65 0 L 135 0 L 170 120 Q 100 135 30 120 Z", // A-line flow
-                shorts: "M 65 0 L 135 0 L 145 70 L 110 70 L 100 30 L 90 70 L 55 70 Z", // Cut high
-                jeans: "M 65 0 L 135 0 L 150 150 L 115 150 L 100 60 L 85 150 L 50 150 Z" // Flared bottom
+            female: {
+                // Base mannequin with feminine proportions
+                body: "M 100 14 A 14 14 0 1 0 100 42 A 14 14 0 1 0 100 14 Z M 94 45 L 106 45 L 108 70 L 92 70 Z M 70 70 L 130 70 L 140 135 L 128 140 L 120 90 L 120 140 L 125 190 L 75 190 L 80 140 L 80 90 L 72 140 L 60 135 Z M 75 190 L 125 190 L 135 320 L 110 320 L 100 230 L 90 320 L 65 320 Z",
+                tops: {
+                    croptop: "M 70 70 L 130 70 L 140 105 L 128 110 L 120 90 L 118 140 L 82 140 L 80 90 L 72 110 L 60 105 Z",
+                    kurti: "M 70 70 L 130 70 L 140 145 L 128 150 L 120 90 L 122 245 L 78 245 L 80 90 L 72 150 L 60 145 Z",
+                    tshirt: "M 70 70 L 130 70 L 140 110 L 128 115 L 120 90 L 122 185 L 78 185 L 80 90 L 72 115 L 60 110 Z"
+                },
+                bottoms: {
+                    lehenga: "M 70 175 L 130 175 L 165 325 L 35 325 Z",
+                    salwar: "M 74 190 L 126 190 L 145 290 L 115 322 L 100 220 L 85 322 L 55 290 Z",
+                    jeans: "M 74 190 L 126 190 L 138 322 L 110 322 L 100 220 L 90 322 L 62 322 Z",
+                    churidar: "M 74 190 L 126 190 L 130 260 L 112 325 L 100 220 L 88 325 L 70 260 Z"
+                },
+                shoes: {
+                    heels: "M 75 320 L 95 320 L 95 345 L 90 345 L 85 335 L 55 340 Q 65 325 75 320 M 105 320 L 125 320 Q 135 325 145 340 L 115 335 L 110 345 L 105 345 Z",
+                    flats: "M 65 320 L 93 320 L 93 335 L 55 335 Q 60 325 65 320 M 107 320 L 135 320 Q 140 325 145 335 L 107 335 Z",
+                    mojari: "M 65 320 L 95 320 L 95 338 L 50 338 Q 40 328 45 320 Q 55 330 65 320 M 105 320 L 135 320 Q 145 330 155 320 Q 160 328 150 338 L 105 338 Z"
+                }
             }
         };
 
+        const displayNames = {
+            tshirt: "T-Shirt", shirt: "Button-Down", kurta: "Kurta", sherwani: "Sherwani",
+            croptop: "Crop Top / Blouse", kurti: "Kurti / Tunic",
+            trousers: "Trousers", jeans: "Jeans", dhoti: "Dhoti",
+            churidar: "Churidar", lehenga: "Lehenga / Skirt", salwar: "Salwar",
+            sneakers: "Sneakers", formal: "Formal Shoes", mojari: "Mojari / Jutti",
+            heels: "Heels / Sandals", flats: "Flats"
+        };
+
         /* =========================================
-           2. COLOR PALETTES
+           2. UNIVERSAL COLOR PALETTE
            ========================================= */
-        const topColors =[
+        const universalColors =[
             { name: 'White', hex: '#f8fafc' }, { name: 'Black', hex: '#1e293b' },
-            { name: 'Navy', hex: '#1e3a8a' }, { name: 'Light Blue', hex: '#7dd3fc'},
-            { name: 'Red', hex: '#b91c1c' }, { name: 'Olive', hex: '#4d7c0f' },
-            { name: 'Mustard', hex: '#ca8a04' }, { name: 'Pink', hex: '#f472b6' },
-            { name: 'Beige', hex: '#f5f5dc' }
-        ];
-
-        const bottomColors =[
-            { name: 'Black', hex: '#0f172a' }, { name: 'Navy', hex: '#172554' },
-            { name: 'Beige', hex: '#c2b280' }, { name: 'Gray', hex: '#64748b' },
-            { name: 'Olive', hex: '#3f6212' }, { name: 'White', hex: '#f8fafc' },
-            { name: 'Denim', hex: '#3b82f6' }
+            { name: 'Navy', hex: '#172554' }, { name: 'Maroon', hex: '#7f1d1d' },
+            { name: 'Emerald', hex: '#064e3b' }, { name: 'Mustard', hex: '#ca8a04' },
+            { name: 'Gold', hex: '#fbbf24' }, { name: 'Blush', hex: '#fbcfe8' },
+            { name: 'Teal', hex: '#0f766e' }, { name: 'Beige', hex: '#f5f5dc' },
+            { name: 'Charcoal', hex: '#334155'}, { name: 'Denim', hex: '#3b82f6' }
         ];
 
         /* =========================================
-           3. 30-ITEM JSON COMBINATION DATABASE
-           ========================================= */
-        const styleDatabase =[
-            { top: "Navy", bottom: "Beige", vibe: "Old Money", tip: "A timeless classic. Pair with brown leather loafers and a matching belt." },
-            { top: "White", bottom: "Black", vibe: "Minimalist Cool", tip: "High contrast and sleek. Perfect with clean white sneakers." },
-            { top: "Black", bottom: "Black", vibe: "Stealth Mode", tip: "An all-black silhouette never goes out of style. Add a silver watch." },
-            { top: "White", bottom: "Navy", vibe: "Nautical Chic", tip: "Fresh and approachable. Great for a casual Friday or weekend brunch." },
-            { top: "Light Blue", bottom: "Navy", vibe: "Monochrome Cool", tip: "Tonal dressing makes you look taller. Try with suede boots." },
-            { top: "Red", bottom: "Beige", vibe: "Preppy Statement", tip: "Bold top grounded by neutral pants. Keep accessories minimal." },
-            { top: "Olive", bottom: "Black", vibe: "Urban Explorer", tip: "Earthy and rugged. Looks amazing with black boots." },
-            { top: "Mustard", bottom: "Navy", vibe: "Autumn Vibe", tip: "Complementary colors that pop. Ideal for fall weather." },
-            { top: "Pink", bottom: "White", vibe: "Summer Breeze", tip: "Light, airy, and confident. Rock this at a resort or beach party." },
-            { top: "Black", bottom: "Gray", vibe: "Industrial Modern", tip: "Sharp and professional but with an edge." },
-            { top: "White", bottom: "Olive", vibe: "Safari Chic", tip: "Clean white makes the olive tones look rich. Add canvas sneakers." },
-            { top: "Navy", bottom: "Gray", vibe: "Business Casual", tip: "The standard for office wear. Highly versatile and respectable." },
-            { top: "Beige", bottom: "White", vibe: "Coastal Grandfather", tip: "Relaxed linen vibes. Pair with woven slip-on shoes." },
-            { top: "Navy", bottom: "Denim", vibe: "Double Blue", tip: "Make sure the shades contrast enough to avoid the uniform look." },
-            { top: "Olive", bottom: "Beige", vibe: "Nature Inspired", tip: "Earthy tones pair beautifully together. Try a leather strap watch." },
-            { top: "Black", bottom: "Beige", vibe: "Smart Casual", tip: "A great transitional outfit from day to night." },
-            { top: "Navy", bottom: "White", vibe: "Yacht Club", tip: "Rich and luxurious. Keep your shoes spotless to complete the look." },
-            { top: "White", bottom: "Gray", vibe: "Clean Cut", tip: "Soft contrast that works on almost every skin tone." },
-            { top: "Red", bottom: "Black", vibe: "Bold & Edgy", tip: "A powerful combination. Best for evening wear or making an impression." },
-            { top: "Mustard", bottom: "Black", vibe: "Striking Contrast", tip: "Let the mustard be the hero piece. Black grounds the outfit." },
-            { top: "Pink", bottom: "Navy", vibe: "Playful Elegance", tip: "Navy cools down the pink, making it very wearable and stylish." },
-            { top: "Light Blue", bottom: "White", vibe: "Resort Wear", tip: "Looks like a clear summer sky. Perfect for warm days." },
-            { top: "Light Blue", bottom: "Gray", vibe: "Soft Professional", tip: "A softer alternative to stark white. Very approachable." },
-            { top: "Beige", bottom: "Navy", vibe: "Inverted Classic", tip: "A lighter top draws the eye upwards. Very flattering." },
-            { top: "Red", bottom: "Navy", vibe: "Americana", tip: "A bold, nautical-inspired color block. Confident and striking." },
-            { top: "Olive", bottom: "Denim", vibe: "Rugged Casual", tip: "The perfect weekend errand outfit. Highly functional style." },
-            { top: "Mustard", bottom: "Denim", vibe: "Retro 70s", tip: "Vintage feel. Pair with some classic canvas high-tops." },
-            { top: "White", bottom: "Denim", vibe: "The Absolute Classic", tip: "James Dean approved. You literally cannot go wrong with this." },
-            { top: "Black", bottom: "Denim", vibe: "Rocker Chic", tip: "Effortless edge. Throw on a leather jacket to complete it." },
-            { top: "White", bottom: "White", vibe: "Angelic / All-White", tip: "High maintenance but high reward. Play with textures!" }
-        ];
-
-        /* =========================================
-           4. APPLICATION STATE & LOGIC
+           3. APPLICATION STATE
            ========================================= */
         let state = {
-            topColor: topColors[0],    // White
-            bottomColor: bottomColors[2] // Beige
+            gender: 'male',
+            topStyle: 'kurta',
+            bottomStyle: 'dhoti',
+            shoeStyle: 'mojari',
+            topColor: universalColors[0],    // White
+            bottomColor: universalColors[9], // Beige
+            shoeColor: universalColors[3]    // Maroon
         };
 
-        // EXACT FUNCTION REQUESTED: Target 'shirt-path' and change fill color
-        function applyTopColorToSVG(hexColor) {
-            const shirtPath = document.getElementById('shirt-path');
-            if (shirtPath) {
-                shirtPath.setAttribute('fill', hexColor);
+        /* =========================================
+           4. ALGORITHMIC STYLE VERDICT
+           ========================================= */
+        function updateVerdict() {
+            let vibe = "Eclectic Fusion";
+            let tip = "A unique mix of styles! Own your confidence.";
+
+            const tradTops = ['kurta', 'sherwani', 'kurti', 'croptop'];
+            const tradBots = ['dhoti', 'churidar', 'lehenga', 'salwar'];
+            
+            const isTradTop = tradTops.includes(state.topStyle);
+            const isTradBot = tradBots.includes(state.bottomStyle);
+
+            // 1. Determine base style vibe
+            if (isTradTop && isTradBot) {
+                vibe = "Traditional Elegance";
+                tip = "Perfect for weddings, festivals, and cultural events. Excellent choice!";
+            } else if (isTradTop || isTradBot) {
+                vibe = "Indo-Western Fusion";
+                tip = "Blending Indian silhouettes with modern cuts. A very contemporary aesthetic.";
+            } else {
+                vibe = "Modern Casual";
+                tip = "Clean, contemporary, and highly versatile for everyday wear.";
             }
-        }
 
-        // Change Bottom Color function
-        function applyBottomColorToSVG(hexColor) {
-            const pantsPath = document.getElementById('pants-path');
-            if (pantsPath) {
-                pantsPath.setAttribute('fill', hexColor);
+            // 2. Apply Color Theory Modifiers
+            const topColor = state.topColor.name;
+            const botColor = state.bottomColor.name;
+            const shoeColor = state.shoeColor.name;
+
+            if (topColor === botColor) {
+                vibe = "Monochrome " + vibe;
+                tip = "Tonal dressing makes you look taller and incredibly put-together.";
+            } else if ((topColor === 'White' && botColor === 'Black') || (topColor === 'Black' && botColor === 'White')) {
+                vibe = "High Contrast " + vibe;
+                tip = "A sharp, timeless contrast that never goes out of style.";
+            } else if (topColor === 'Gold' || botColor === 'Gold' || shoeColor === 'Gold') {
+                vibe = "Regal " + vibe;
+                tip = "The gold accents add a luxurious, royal touch to your ensemble. Great for evening events.";
             }
+
+            document.getElementById('vibe-title').innerText = vibe;
+            document.getElementById('style-tip').innerText = tip;
         }
 
-        // Swap SVG Shapes
-        function changeTopStyle(styleKey) {
-            document.getElementById('shirt-path').setAttribute('d', svgPaths.tops[styleKey]);
+        /* =========================================
+           5. RENDER LOGIC
+           ========================================= */
+        function renderSVG() {
+            // Body
+            document.getElementById('body-path').setAttribute('d', svgData[state.gender].body);
+            // Garments
+            document.getElementById('tops-path').setAttribute('d', svgData[state.gender].tops[state.topStyle]);
+            document.getElementById('bottoms-path').setAttribute('d', svgData[state.gender].bottoms[state.bottomStyle]);
+            document.getElementById('shoes-path').setAttribute('d', svgData[state.gender].shoes[state.shoeStyle]);
+            
+            // Colors
+            document.getElementById('tops-path').setAttribute('fill', state.topColor.hex);
+            document.getElementById('bottoms-path').setAttribute('fill', state.bottomColor.hex);
+            document.getElementById('shoes-path').setAttribute('fill', state.shoeColor.hex);
+            
+            updateVerdict();
         }
 
-        function changeBottomStyle(styleKey) {
-            document.getElementById('pants-path').setAttribute('d', svgPaths.bottoms[styleKey]);
+        function populateDropdown(selectId, optionsDict, currentStateValue) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            Object.keys(optionsDict).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = displayNames[key] || key;
+                if(key === currentStateValue) opt.selected = true;
+                select.appendChild(opt);
+            });
         }
 
-        // Render Color Buttons
-        function renderSwatches(containerId, colorsArray, currentColor, isTop) {
+        function setGender(gender) {
+            state.gender = gender;
+            
+            // Update UI buttons
+            const btnMale = document.getElementById('btn-male');
+            const btnFemale = document.getElementById('btn-female');
+            if (gender === 'male') {
+                btnMale.className = "px-6 py-1.5 text-sm font-semibold rounded-full transition-colors bg-indigo-500 text-white shadow";
+                btnFemale.className = "px-6 py-1.5 text-sm font-semibold rounded-full transition-colors text-slate-600 hover:bg-slate-100";
+            } else {
+                btnFemale.className = "px-6 py-1.5 text-sm font-semibold rounded-full transition-colors bg-pink-500 text-white shadow";
+                btnMale.className = "px-6 py-1.5 text-sm font-semibold rounded-full transition-colors text-slate-600 hover:bg-slate-100";
+            }
+
+            // Reset to first available style for the new gender to avoid broken paths
+            state.topStyle = Object.keys(svgData[gender].tops)[0];
+            state.bottomStyle = Object.keys(svgData[gender].bottoms)[0];
+            state.shoeStyle = Object.keys(svgData[gender].shoes)[0];
+
+            populateDropdown('top-style-select', svgData[gender].tops, state.topStyle);
+            populateDropdown('bottom-style-select', svgData[gender].bottoms, state.bottomStyle);
+            populateDropdown('shoe-style-select', svgData[gender].shoes, state.shoeStyle);
+
+            renderSVG();
+        }
+
+        function changeStyle(stateKey, newValue) {
+            state[stateKey] = newValue;
+            renderSVG();
+        }
+
+        function renderSwatches(containerId, colorKey) {
             const container = document.getElementById(containerId);
             container.innerHTML = ''; 
 
-            colorsArray.forEach(color => {
+            universalColors.forEach(color => {
                 const btn = document.createElement('button');
-                const isSelected = currentColor.name === color.name;
+                const isSelected = state[colorKey].name === color.name;
                 
                 btn.className = `w-8 h-8 rounded-full shadow-sm border-2 flex-shrink-0 transition-all duration-200 
                     ${isSelected ? 'border-indigo-500 scale-125 ring-2 ring-indigo-200 z-10' : 'border-slate-200 hover:scale-110'}`;
@@ -236,55 +308,23 @@
                 btn.title = color.name;
                 
                 btn.onclick = () => {
-                    if(isTop) {
-                        state.topColor = color;
-                        applyTopColorToSVG(color.hex); // Calling the specific JS function
-                    } else {
-                        state.bottomColor = color;
-                        applyBottomColorToSVG(color.hex);
-                    }
-                    // Re-render to update the visual "selected" ring
-                    renderSwatches('top-swatches', topColors, state.topColor, true);
-                    renderSwatches('bottom-swatches', bottomColors, state.bottomColor, false);
-                    updateVerdict();
+                    state[colorKey] = color;
+                    // Re-render UI to update rings and colors
+                    renderSwatches('top-swatches', 'topColor');
+                    renderSwatches('bottom-swatches', 'bottomColor');
+                    renderSwatches('shoe-swatches', 'shoeColor');
+                    renderSVG();
                 };
                 container.appendChild(btn);
             });
         }
 
-        // Update the JSON-driven Verdict Box
-        function updateVerdict() {
-            const topName = state.topColor.name;
-            const bottomName = state.bottomColor.name;
-            
-            // Search the 30-item JSON array for a match
-            const match = styleDatabase.find(combo => combo.top === topName && combo.bottom === bottomName);
-            
-            const titleEl = document.getElementById('vibe-title');
-            const tipEl = document.getElementById('style-tip');
-
-            if (match) {
-                titleEl.innerText = match.vibe;
-                tipEl.innerText = match.tip;
-            } else {
-                // Fallback for combinations not in the 30-item list
-                titleEl.innerText = "Avant-Garde Explorer";
-                tipEl.innerText = `You're pairing a ${topName} top with ${bottomName} bottoms. Confidence is your best accessory—own this unique combo!`;
-            }
-        }
-
         // Initialization
         function init() {
-            // Setup initial colors
-            applyTopColorToSVG(state.topColor.hex);
-            applyBottomColorToSVG(state.bottomColor.hex);
-            
-            // Build UI pickers
-            renderSwatches('top-swatches', topColors, state.topColor, true);
-            renderSwatches('bottom-swatches', bottomColors, state.bottomColor, false);
-            
-            // Generate Initial Verdict
-            updateVerdict();
+            setGender('male'); // This populates dropdowns and does the first renderSVG()
+            renderSwatches('top-swatches', 'topColor');
+            renderSwatches('bottom-swatches', 'bottomColor');
+            renderSwatches('shoe-swatches', 'shoeColor');
         }
 
         // Run on load
